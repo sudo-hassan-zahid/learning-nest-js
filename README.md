@@ -95,3 +95,37 @@ $ docker compose exec redis redis-cli
 |-|---|
 | Host | `localhost` |
 | Port | `6399` |
+
+## Prisma
+
+### Setup
+
+Copy the example env file and fill in your values:
+
+```bash
+$ cp .env.example .env
+```
+
+### Commands
+
+```bash
+# run all pending migrations
+$ npx prisma migrate dev
+
+# create a new migration after schema changes
+$ npx prisma migrate dev --name <migration-name>
+
+# apply migrations in CI/production (no prompt)
+$ npx prisma migrate deploy
+
+# open Prisma Studio (visual DB browser)
+$ npx prisma studio
+
+# validate the schema
+$ npx prisma validate
+
+# regenerate the Prisma client after schema changes
+$ npx prisma generate
+```
+
+> **Note:** The `url` field is intentionally absent from `datasource db` in `schema.prisma`. Prisma 7 reads the connection URL from `prisma.config.ts` instead. The VS Code Prisma extension may show a false error for this — ignore it.
