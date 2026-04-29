@@ -10,15 +10,13 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
   imports: [
     ThrottlerModule.forRoot([
       { name: 'default', ttl: 60_000, limit: 100 }, // 100 req/min for all routes
-      { name: 'auth', ttl: 60_000, limit: 100 },    // overridden per-route via @AuthThrottle
+      { name: 'auth', ttl: 60_000, limit: 100 }, // overridden per-route via @AuthThrottle
     ]),
     PrismaModule,
     AuthModule,
     UsersModule,
   ],
-  providers: [
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
