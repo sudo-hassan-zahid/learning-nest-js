@@ -128,4 +128,36 @@ $ npx prisma validate
 $ npx prisma generate
 ```
 
-> **Note:** The `url` field is intentionally absent from `datasource db` in `schema.prisma`. Prisma 7 reads the connection URL from `prisma.config.ts` instead. The VS Code Prisma extension may show a false error for this — ignore it.
+> **Note:** The `url` field is intentionally absent from `datasource db` in `schema.prisma`. Prisma 7 reads the connection URL from `prisma.config.ts` instead.
+
+## API
+
+All protected routes require `Authorization: Bearer <accessToken>`.
+
+### Auth
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/auth/signup` | Public | Register a new user, returns token pair |
+| `POST` | `/auth/login` | Public | Login, returns token pair |
+| `GET` | `/auth/me` | Access token | Returns the current user |
+| `POST` | `/auth/refresh` | Refresh token | Rotates and returns a new token pair |
+| `POST` | `/auth/logout` | Access token | Invalidates all refresh tokens |
+
+### Users
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/users` | Access token | List all active users |
+| `GET` | `/users/:id` | Access token | Get a single user |
+| `PATCH` | `/users/:id` | Access token | Update own profile (owner only) |
+| `DELETE` | `/users/:id` | Access token | Soft-delete own account (owner only) |
+
+### Tokens
+
+| Token | Expiry | Secret env var |
+|-------|--------|----------------|
+| Access | `JWT_ACCESS_EXPIRES_IN` (default 15m) | `JWT_ACCESS_SECRET` |
+| Refresh | `JWT_REFRESH_EXPIRES_IN` (default 7d) | `JWT_REFRESH_SECRET` |
+
+Refresh tokens are hashed and stored in the `RefreshToken` table. Each refresh rotates the token — the old one is invalidated immediately.
