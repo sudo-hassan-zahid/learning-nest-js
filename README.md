@@ -154,6 +154,17 @@ const allowedOrigins = [
 ];
 ```
 
+## API Docs (Swagger)
+
+Interactive docs are available at **[http://localhost:3000/swagger](http://localhost:3000/swagger)** when the app is running.
+
+1. Call `POST /auth/signup` or `POST /auth/login`
+2. Copy the `accessToken` from the response
+3. Click **Authorize** (top-right in Swagger UI) and enter `Bearer <token>`
+4. All protected endpoints are now unlocked
+
+---
+
 ## API
 
 All protected routes require `Authorization: Bearer <accessToken>`.
