@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -18,9 +19,11 @@ async function bootstrap() {
       }
     },
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type'],
     credentials: true,
   });
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
@@ -30,23 +33,23 @@ async function bootstrap() {
     .setTitle('NestJS Auth API')
     .setDescription(
       `## Overview\n\nA JWT-based authentication API built with NestJS, Prisma, and PostgreSQL.\n\n` +
-        `## Authentication\n\nMost endpoints require a JWT **access token**. After login or signup, copy the ` +
-        `\`accessToken\` value and click **Authorize** (top right), then enter \`Bearer <token>\`.\n\n` +
-        `The \`POST /auth/refresh\` endpoint uses your **refresh token** in the same way.\n\n` +
-        `## Token Lifecycle\n\n` +
-        `| Token | Default TTL | Notes |\n` +
-        `|-------|-------------|-------|\n` +
-        `| Access | 15 min | Short-lived, sent with every request |\n` +
-        `| Refresh | 7 days | Rotated on each use — old token invalidated immediately |`,
+        `## Authentication\n\nTokens are stored in **HTTP-only secure cookies** — the browser sends them automatically on every request.\n\n` +
+        `| Cookie | TTL | Notes |\n` +
+        `|--------|-----|-------|\n` +
+        `| \`accessToken\` | 15 min | Sent with every protected request |\n` +
+        `| \`refreshToken\` | 7 days | Rotated on each use — old token invalidated immediately |`,
     )
     .setVersion('1.0')
-    .addBearerAuth({
-      type: 'http',
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-      description:
-        'Paste your access token (or refresh token for /auth/refresh)',
-    })
+    .addCookieAuth(
+      'accessToken',
+      { type: 'apiKey', in: 'cookie', name: 'accessToken' },
+      'accessToken',
+    )
+    .addCookieAuth(
+      'refreshToken',
+      { type: 'apiKey', in: 'cookie', name: 'refreshToken' },
+      'refreshToken',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
