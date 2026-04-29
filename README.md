@@ -44,20 +44,37 @@ Postgres runs in Docker. The app itself runs locally with `npm run start:dev`.
 ### Prerequisites
 - Docker >= 24 and Docker Compose v2
 
-### Start Postgres
+### Commands
 
 ```bash
+# start all services
 $ docker compose up -d
-```
 
-### Stop Postgres
-
-```bash
-# keeps data
+# stop all services (data persisted)
 $ docker compose down
 
-# wipes the database volume too
+# stop and wipe all volumes (destructive)
 $ docker compose down -v
+
+# view running containers
+$ docker compose ps
+
+# tail logs for all services
+$ docker compose logs -f
+
+# tail logs for a specific service
+$ docker compose logs -f db
+$ docker compose logs -f redis
+
+# restart a specific service
+$ docker compose restart db
+$ docker compose restart redis
+
+# open a psql shell inside the container
+$ docker compose exec db psql -U postgres -d nestdb
+
+# open a redis-cli shell inside the container
+$ docker compose exec redis redis-cli
 ```
 
 ### Connection details
