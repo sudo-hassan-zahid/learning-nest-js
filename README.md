@@ -4,80 +4,76 @@
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
-  
+
 ## Project setup
 
 ```bash
 $ npm install
+$ cp .env.example .env
 ```
 
-## Compile and run the project
+## Running the project
+
+### With Docker (recommended)
+
+Runs the app, Postgres, and Redis together. Migrations and seeding run automatically on startup.
 
 ```bash
-# development
-$ npm run start
+# build and start everything
+$ docker compose up --build -d
 
-# watch mode
-$ npm run start:dev
+# tail app logs
+$ docker compose logs -f app
 
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Database (local development)
-
-Postgres runs in Docker. The app itself runs locally with `npm run start:dev`.
-
-### Prerequisites
-- Docker >= 24 and Docker Compose v2
-
-### Commands
-
-```bash
-# start all services
-$ docker compose up -d
-
-# stop all services (data persisted)
+# stop (data persisted)
 $ docker compose down
 
 # stop and wipe all volumes (destructive)
 $ docker compose down -v
+```
 
+### Local (app only, infra in Docker)
+
+Start Postgres and Redis first, then run the app locally.
+
+```bash
+$ docker compose up -d db redis
+
+# development
+$ npm run start:dev
+
+# watch mode (alias for start:dev)
+$ npm run start
+
+# production build
+$ npm run start:prod
+```
+
+## Docker commands
+
+```bash
 # view running containers
 $ docker compose ps
 
-# tail logs for all services
-$ docker compose logs -f
-
 # tail logs for a specific service
+$ docker compose logs -f app
 $ docker compose logs -f db
 $ docker compose logs -f redis
 
 # restart a specific service
-$ docker compose restart db
-$ docker compose restart redis
+$ docker compose restart app
 
-# open a psql shell inside the container
+# open a psql shell
 $ docker compose exec db psql -U postgres -d nestdb
 
-# open a redis-cli shell inside the container
+# open a redis-cli shell
 $ docker compose exec redis redis-cli
+
+# rebuild the app image after code changes
+$ docker compose up --build -d app
 ```
 
-### Connection details
+## Infra connection details
 
 **Postgres**
 
@@ -98,25 +94,17 @@ $ docker compose exec redis redis-cli
 
 ## Prisma
 
-### Setup
-
-Copy the example env file and fill in your values:
-
-```bash
-$ cp .env.example .env
-```
-
 ### Commands
 
 ```bash
-# run all pending migrations
-$ npx prisma migrate dev
-
 # create a new migration after schema changes
 $ npx prisma migrate dev --name <migration-name>
 
-# apply migrations in CI/production (no prompt)
+# apply migrations without prompts (CI/prod)
 $ npx prisma migrate deploy
+
+# seed the database
+$ npx prisma db seed
 
 # open Prisma Studio (visual DB browser)
 $ npx prisma studio
@@ -130,9 +118,34 @@ $ npx prisma generate
 
 > **Note:** The `url` field is intentionally absent from `datasource db` in `schema.prisma`. Prisma 7 reads the connection URL from `prisma.config.ts` instead.
 
+### Seed data
+
+Running `npx prisma db seed` creates the following users (password: `Admin1234!` / `Password1234!`):
+
+| Email | Password |
+|-------|----------|
+| `admin@example.com` | `Admin1234!` |
+| `jane@example.com` | `Password1234!` |
+| `john@example.com` | `Password1234!` |
+
+Seed uses `upsert` — safe to run multiple times.
+
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
 ## CORS
 
-Allowed origins are defined as an array in `src/main.ts`. Add or remove entries there as needed — no env var required.
+Allowed origins are defined as an array in `src/main.ts`. Add or remove entries there as needed.
 
 ```ts
 const allowedOrigins = [
