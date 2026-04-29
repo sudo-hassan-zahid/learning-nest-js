@@ -120,15 +120,15 @@ $ npx prisma generate
 
 ### Seed data
 
-Running `npx prisma db seed` creates the following users (password: `Admin1234!` / `Password1234!`):
+Running `npx prisma db seed` creates users, tags, posts, comments, likes, and share links:
 
 | Email | Password |
 |-------|----------|
-| `admin@example.com` | `Admin1234!` |
-| `jane@example.com` | `Password1234!` |
-| `john@example.com` | `Password1234!` |
+| `hassan@echowrite.dev` | `Admin1234!` |
+| `jane@echowrite.dev` | `Password1234!` |
+| `john@echowrite.dev` | `Password1234!` |
 
-Seed uses `upsert` — safe to run multiple times.
+Seed uses `upsert` -- safe to run multiple times.
 
 ## Run tests
 
@@ -165,34 +165,41 @@ Interactive docs are available at **[http://localhost:3000/swagger](http://local
 
 ---
 
-## API
+## Health
 
-All protected routes require `Authorization: Bearer <accessToken>`.
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /health` | Full check: DB, Redis, heap, and RSS memory |
+| `GET /health/live` | Liveness probe (no I/O) |
+| `GET /health/ready` | Readiness probe: DB and Redis only |
+
+All health routes are exempt from rate limiting.
+
+## Features
 
 ### Auth
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/auth/signup` | Public | Register a new user, returns token pair |
-| `POST` | `/auth/login` | Public | Login, returns token pair |
-| `GET` | `/auth/me` | Access token | Returns the current user |
-| `POST` | `/auth/refresh` | Refresh token | Rotates and returns a new token pair |
-| `POST` | `/auth/logout` | Access token | Invalidates all refresh tokens |
+JWT access/refresh token pair. Refresh tokens are hashed and stored in the `RefreshToken` table -- each refresh rotates the token and invalidates the previous one.
 
-### Users
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/users` | Access token | List all active users |
-| `GET` | `/users/:id` | Access token | Get a single user |
-| `PATCH` | `/users/:id` | Access token | Update own profile (owner only) |
-| `DELETE` | `/users/:id` | Access token | Soft-delete own account (owner only) |
-
-### Tokens
-
-| Token | Expiry | Secret env var |
-|-------|--------|----------------|
+| Token | Expiry env var | Secret env var |
+|-------|----------------|----------------|
 | Access | `JWT_ACCESS_EXPIRES_IN` (default 15m) | `JWT_ACCESS_SECRET` |
 | Refresh | `JWT_REFRESH_EXPIRES_IN` (default 7d) | `JWT_REFRESH_SECRET` |
 
-Refresh tokens are hashed and stored in the `RefreshToken` table. Each refresh rotates the token — the old one is invalidated immediately.
+Forgot password issues a single-use Redis token (15 min TTL) and always returns 204 to prevent email enumeration. Account deletion soft-deletes the record, revokes all sessions, blacklists the access token, and sends a farewell email.
+
+### Blogger
+
+Posts support a draft / publish / archive lifecycle with slug generation, view count, toggle like, tag filtering, and pagination. Comments support nested replies -- soft delete preserves thread integrity. Share links use a short code and expire after 30 days.
+
+See the interactive docs for the full endpoint list.
+
+### Mailer
+
+Nodemailer SMTP. Sends welcome, forgot-password, account-deleted, and new-comment emails. All templates share a base layout in `src/mail/templates/base.template.ts`.
+
+### Uploads
+
+Cloudinary integration via `UploadModule`. Accepts JPEG, PNG, WebP, and GIF up to 5 MB.
+
+> **Note:** Cloudinary environment config is not yet finalized for production.
