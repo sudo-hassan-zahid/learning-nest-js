@@ -62,6 +62,8 @@ $ docker compose down -v
 
 ### Connection details
 
+**Postgres**
+
 | | |
 |-|---|
 | Host | `localhost` |
@@ -69,3 +71,10 @@ $ docker compose down -v
 | Database | `nestdb` |
 | Username | `postgres` |
 | Password | `postgres` |
+
+**Redis**
+
+| | |
+|-|---|
+| Host | `localhost` |
+| Port | `6399` |
