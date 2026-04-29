@@ -28,7 +28,7 @@ export class HealthController {
       () => this.prisma.isHealthy('database'),
       () => this.redis.isHealthy('redis'),
       () => this.memory.checkHeap('memory_heap', 300 * 1024 * 1024), // 300 MB
-      () => this.memory.checkRSS('memory_rss', 512 * 1024 * 1024),   // 512 MB
+      () => this.memory.checkRSS('memory_rss', 512 * 1024 * 1024), // 512 MB
     ]);
   }
 
@@ -40,7 +40,9 @@ export class HealthController {
 
   @Get('ready')
   @HealthCheck()
-  @ApiOperation({ summary: 'Readiness probe — confirms DB and Redis are reachable' })
+  @ApiOperation({
+    summary: 'Readiness probe — confirms DB and Redis are reachable',
+  })
   ready() {
     return this.health.check([
       () => this.prisma.isHealthy('database'),
