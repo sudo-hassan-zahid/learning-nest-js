@@ -130,6 +130,17 @@ $ npx prisma generate
 
 > **Note:** The `url` field is intentionally absent from `datasource db` in `schema.prisma`. Prisma 7 reads the connection URL from `prisma.config.ts` instead.
 
+## CORS
+
+Allowed origins are defined as an array in `src/main.ts`. Add or remove entries there as needed — no env var required.
+
+```ts
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
+```
+
 ## API
 
 All protected routes require `Authorization: Bearer <accessToken>`.
