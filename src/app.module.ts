@@ -13,6 +13,7 @@ import { TagsModule } from './tags/tags.module';
 import { ShareModule } from './share/share.module';
 import { UploadModule } from './upload/upload.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
 @Module({
   imports: [
@@ -36,6 +37,6 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(CorrelationIdMiddleware, LoggerMiddleware).forRoutes('*');
   }
 }
