@@ -12,6 +12,7 @@ import { CommentsModule } from './comments/comments.module';
 import { TagsModule } from './tags/tags.module';
 import { ShareModule } from './share/share.module';
 import { UploadModule } from './upload/upload.module';
+import { HealthModule } from './health/health.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
@@ -32,6 +33,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     TagsModule,
     ShareModule,
     UploadModule,
+    HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
