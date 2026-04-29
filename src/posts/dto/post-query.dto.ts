@@ -25,4 +25,12 @@ export class PostQueryDto {
   @IsOptional()
   @IsString()
   tag?: string;
+
+  @ApiPropertyOptional({
+    example: 'how to build',
+    description: 'Full-text search on title and content',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

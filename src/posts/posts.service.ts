@@ -44,13 +44,20 @@ export class PostsService {
   }
 
   async findPublished(query: PostQueryDto) {
-    const { page = 1, limit = 10, tag } = query;
+    const { page = 1, limit = 10, tag, search } = query;
     const skip = (page - 1) * limit;
 
     const where = {
       status: PostStatus.PUBLISHED,
       isDeleted: false,
       ...(tag && { tags: { some: { tag: { slug: tag } } } }),
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' as const } },
+          { content: { contains: search, mode: 'insensitive' as const } },
+          { excerpt: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }),
     };
 
     const [posts, total] = await Promise.all([
