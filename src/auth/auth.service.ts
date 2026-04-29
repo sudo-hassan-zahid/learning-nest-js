@@ -69,6 +69,44 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.prisma.db.user.findFirst({
+      where: { email, isDeleted: false },
+    });
+    // always return success to prevent email enumeration
+    if (!user) return;
+
+    const token = randomUUID();
+    await this.redis.set(`reset:${token}`, user.id, 15 * 60); // 15 min TTL
+    this.mail.sendForgotPassword(user.email, user.firstName, token).catch(() => null);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const userId = await this.redis.get(`reset:${token}`);
+    if (!userId) throw new UnauthorizedException('Reset link is invalid or has expired');
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await this.prisma.db.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
+    await this.redis.del(`reset:${token}`);
+  }
+
+  async deleteAccount(userId: string, rawAccessToken?: string) {
+    const user = await this.prisma.db.user.findUniqueOrThrow({ where: { id: userId } });
+
+    await this.prisma.db.user.update({
+      where: { id: userId },
+      data: { isDeleted: true, deletedAt: new Date(), isActive: false },
+    });
+
+    // revoke all sessions
+    await this.logout(userId, rawAccessToken);
+
+    this.mail.sendAccountDeleted(user.email, user.firstName).catch(() => null);
+  }
+
   async logout(userId: string, rawAccessToken?: string) {
     await this.prisma.db.refreshToken.deleteMany({ where: { userId } });
 

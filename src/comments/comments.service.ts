@@ -40,7 +40,14 @@ export class CommentsService {
       const name = `${commenter?.firstName} ${commenter?.lastName}`;
       const postUrl = `${process.env.APP_URL}/posts/${post.slug}`;
       this.mail
-        .sendNewComment(post.author.email, post.title, name, postUrl)
+        .sendNewComment(
+          post.author.email,
+          post.author.firstName,
+          post.title,
+          name,
+          dto.content.slice(0, 200),
+          postUrl,
+        )
         .catch(() => null);
     }
 
