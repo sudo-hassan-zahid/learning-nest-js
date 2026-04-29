@@ -36,3 +36,36 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## Database (local development)
+
+Postgres runs in Docker. The app itself runs locally with `npm run start:dev`.
+
+### Prerequisites
+- Docker >= 24 and Docker Compose v2
+
+### Start Postgres
+
+```bash
+$ docker compose up -d
+```
+
+### Stop Postgres
+
+```bash
+# keeps data
+$ docker compose down
+
+# wipes the database volume too
+$ docker compose down -v
+```
+
+### Connection details
+
+| | |
+|-|---|
+| Host | `localhost` |
+| Port | `5460` |
+| Database | `nestdb` |
+| Username | `postgres` |
+| Password | `postgres` |
