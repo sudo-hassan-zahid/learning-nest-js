@@ -23,7 +23,11 @@ import { Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { LoginDto } from './dto/login.dto.js';
-import { TokenPairDto, UserProfileDto } from './dto/auth-response.dto.js';
+import {
+  AuthResponseDto,
+  TokenPairDto,
+  UserProfileDto,
+} from './dto/auth-response.dto.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { RefreshTokenGuard } from './guards/refresh-token.guard.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
@@ -65,7 +69,7 @@ export class AuthController {
   })
   @ApiBody({ type: SignupDto })
   @ApiCreatedResponse({
-    type: TokenPairDto,
+    type: AuthResponseDto,
     description: 'Account created — cookies set',
   })
   @ApiConflictResponse({ description: 'Email already in use' })
@@ -88,7 +92,7 @@ export class AuthController {
   })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({
-    type: TokenPairDto,
+    type: AuthResponseDto,
     description: 'Login successful — cookies set',
   })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -128,7 +132,7 @@ export class AuthController {
       'Reads the `refreshToken` cookie, issues a new token pair, and updates both cookies. The old refresh token is immediately invalidated.',
   })
   @ApiOkResponse({
-    type: TokenPairDto,
+    type: AuthResponseDto,
     description: 'New token pair issued — cookies updated',
   })
   @ApiUnauthorizedResponse({

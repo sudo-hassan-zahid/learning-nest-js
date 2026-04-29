@@ -53,3 +53,8 @@ export class UserProfileDto {
   })
   updatedAt!: string;
 }
+
+export class AuthResponseDto extends TokenPairDto {
+  @ApiProperty({ type: UserProfileDto })
+  user!: UserProfileDto;
+}

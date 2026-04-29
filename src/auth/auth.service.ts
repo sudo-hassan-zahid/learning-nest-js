@@ -28,7 +28,7 @@ export class AuthService {
       data: { ...dto, password: hashed },
     });
 
-    return this.issueTokens(user.id, user.email);
+    return this.issueTokens(user);
   }
 
   async login(dto: LoginDto) {
@@ -41,7 +41,7 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    return this.issueTokens(user.id, user.email);
+    return this.issueTokens(user);
   }
 
   async refresh(userId: string, rawRefreshToken: string) {
@@ -60,15 +60,24 @@ export class AuthService {
       where: { id: userId },
     });
 
-    return this.issueTokens(user.id, user.email);
+    return this.issueTokens(user);
   }
 
   async logout(userId: string) {
     await this.prisma.db.refreshToken.deleteMany({ where: { userId } });
   }
 
-  private async issueTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
+  private async issueTokens(user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isActive: boolean;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }) {
+    const payload = { sub: user.id, email: user.email };
 
     const accessToken = this.jwt.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
@@ -84,9 +93,32 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     await this.prisma.db.refreshToken.create({
-      data: { userId, tokenHash, expiresAt },
+      data: { userId: user.id, tokenHash, expiresAt },
     });
 
-    return { accessToken, refreshToken };
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      isActive,
+      isDeleted,
+      createdAt,
+      updatedAt,
+    } = user;
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id,
+        email,
+        firstName,
+        lastName,
+        isActive,
+        isDeleted,
+        createdAt,
+        updatedAt,
+      },
+    };
   }
 }
