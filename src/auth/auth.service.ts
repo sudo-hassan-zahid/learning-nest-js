@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
+import { MailService } from '../mail/mail.service.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly redis: RedisService,
+    private readonly mail: MailService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -31,6 +33,7 @@ export class AuthService {
       data: { ...dto, password: hashed },
     });
 
+    this.mail.sendWelcome(user.email, user.firstName).catch(() => null);
     return this.issueTokens(user);
   }
 
