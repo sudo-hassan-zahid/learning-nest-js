@@ -91,14 +91,15 @@ export class CommentsService {
 
   private async assertOwner(id: string, authorId: string) {
     const comment = await this.prisma.db.comment.findUnique({ where: { id } });
-    if (!comment || comment.isDeleted) throw new NotFoundException('Comment not found');
+    if (!comment || comment.isDeleted)
+      throw new NotFoundException('Comment not found');
     if (comment.authorId !== authorId) throw new ForbiddenException();
     return comment;
   }
 
-  private maskDeleted<T extends { isDeleted: boolean; content: string; replies?: any[] }>(
-    comment: T,
-  ): T {
+  private maskDeleted<
+    T extends { isDeleted: boolean; content: string; replies?: any[] },
+  >(comment: T): T {
     return {
       ...comment,
       content: comment.isDeleted ? '[deleted]' : comment.content,

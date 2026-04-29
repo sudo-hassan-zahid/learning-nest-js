@@ -31,7 +31,10 @@ export class CreatePostDto {
   @IsString()
   coverImage?: string;
 
-  @ApiPropertyOptional({ type: [String], example: ['uuid-tag-1', 'uuid-tag-2'] })
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['uuid-tag-1', 'uuid-tag-2'],
+  })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })

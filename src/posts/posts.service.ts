@@ -12,7 +12,9 @@ import { UpdatePostDto } from './dto/update-post.dto.js';
 import { PostQueryDto } from './dto/post-query.dto.js';
 
 const postInclude = {
-  author: { select: { id: true, firstName: true, lastName: true, avatar: true } },
+  author: {
+    select: { id: true, firstName: true, lastName: true, avatar: true },
+  },
   tags: { include: { tag: { select: { id: true, name: true, slug: true } } } },
   _count: { select: { likes: true, comments: true } },
 };
@@ -62,7 +64,13 @@ export class PostsService {
       this.prisma.db.post.count({ where }),
     ]);
 
-    return { data: posts, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return {
+      data: posts,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findMine(authorId: string) {

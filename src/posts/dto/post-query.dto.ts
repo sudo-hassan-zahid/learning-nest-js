@@ -18,7 +18,10 @@ export class PostQueryDto {
   @Max(50)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ example: 'typescript', description: 'Filter by tag slug' })
+  @ApiPropertyOptional({
+    example: 'typescript',
+    description: 'Filter by tag slug',
+  })
   @IsOptional()
   @IsString()
   tag?: string;

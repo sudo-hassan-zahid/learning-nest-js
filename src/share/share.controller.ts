@@ -26,10 +26,7 @@ export class ShareController {
   @ApiCookieAuth('accessToken')
   @ApiOperation({ summary: 'Generate a share link for a post' })
   @ApiParam({ name: 'id', description: 'Post ID' })
-  generate(
-    @Param('id') postId: string,
-    @CurrentUser() user: { id: string },
-  ) {
+  generate(@Param('id') postId: string, @CurrentUser() user: { id: string }) {
     return this.shareService.generate(postId, user.id);
   }
 

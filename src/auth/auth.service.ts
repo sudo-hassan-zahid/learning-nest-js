@@ -117,11 +117,29 @@ export class AuthService {
       data: { userId: user.id, tokenHash, expiresAt },
     });
 
-    const { id, email, firstName, lastName, isActive, isDeleted, createdAt, updatedAt } = user;
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      isActive,
+      isDeleted,
+      createdAt,
+      updatedAt,
+    } = user;
     return {
       accessToken,
       refreshToken,
-      user: { id, email, firstName, lastName, isActive, isDeleted, createdAt, updatedAt },
+      user: {
+        id,
+        email,
+        firstName,
+        lastName,
+        isActive,
+        isDeleted,
+        createdAt,
+        updatedAt,
+      },
     };
   }
 }

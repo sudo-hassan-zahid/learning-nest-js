@@ -42,7 +42,9 @@ export class CommentsController {
   }
 
   @Get('posts/:postId/comments')
-  @ApiOperation({ summary: 'List comments for a post (nested replies included)' })
+  @ApiOperation({
+    summary: 'List comments for a post (nested replies included)',
+  })
   @ApiParam({ name: 'postId', description: 'Post ID' })
   findByPost(@Param('postId') postId: string) {
     return this.commentsService.findByPost(postId);
