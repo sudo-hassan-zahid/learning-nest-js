@@ -3,17 +3,26 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { Strategy } from 'passport-jwt';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { RedisService } from '../../redis/redis.service.js';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {
     super({
       jwtFromRequest: (req: Request) => req?.cookies?.accessToken ?? null,
       secretOrKey: process.env.JWT_ACCESS_SECRET as string,
     });
   }
 
-  async validate(payload: { sub: string; email: string }) {
+  async validate(payload: { sub: string; email: string; jti?: string }) {
+    if (payload.jti) {
+      const blacklisted = await this.redis.get(`blacklist:${payload.jti}`);
+      if (blacklisted) throw new UnauthorizedException();
+    }
+
     const user = await this.prisma.db.user.findFirst({
       where: { id: payload.sub, isDeleted: false },
     });
