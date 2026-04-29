@@ -57,7 +57,13 @@ export class MailService {
     return this.send(
       to,
       `New comment on "${postTitle}" 💬`,
-      newCommentTemplate(authorFirstName, commenterName, postTitle, commentContent, postUrl),
+      newCommentTemplate(
+        authorFirstName,
+        commenterName,
+        postTitle,
+        commentContent,
+        postUrl,
+      ),
     );
   }
 }

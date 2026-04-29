@@ -1,4 +1,9 @@
-import { baseTemplate, ctaButton, featureRow, header } from './base.template.js';
+import {
+  baseTemplate,
+  ctaButton,
+  featureRow,
+  header,
+} from './base.template.js';
 
 export function welcomeTemplate(firstName: string, appUrl: string): string {
   return baseTemplate(`

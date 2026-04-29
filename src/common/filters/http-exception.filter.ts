@@ -54,33 +54,48 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         typeof res === 'string'
           ? res
           : Array.isArray((res as any).message)
-            ? (res as any).message[0]   // first validation error
-            : (res as any).message ?? exception.message;
+            ? (res as any).message[0] // first validation error
+            : ((res as any).message ?? exception.message);
 
       return { statusCode: exception.getStatus(), message };
     }
 
     // Rate limiter
     if (exception instanceof ThrottlerException) {
-      return { statusCode: HttpStatus.TOO_MANY_REQUESTS, message: 'Too many requests — slow down' };
+      return {
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+        message: 'Too many requests — slow down',
+      };
     }
 
     // Prisma known errors
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       if (exception.code === 'P2002') {
-        return { statusCode: HttpStatus.CONFLICT, message: 'A record with that value already exists' };
+        return {
+          statusCode: HttpStatus.CONFLICT,
+          message: 'A record with that value already exists',
+        };
       }
       if (exception.code === 'P2025') {
-        return { statusCode: HttpStatus.NOT_FOUND, message: 'Record not found' };
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Record not found',
+        };
       }
     }
 
     // Prisma validation errors
     if (exception instanceof Prisma.PrismaClientValidationError) {
-      return { statusCode: HttpStatus.BAD_REQUEST, message: 'Invalid database query' };
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Invalid database query',
+      };
     }
 
     // Everything else is a 500
-    return { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal server error' };
+    return {
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Internal server error',
+    };
   }
 }

@@ -78,12 +78,15 @@ export class AuthService {
 
     const token = randomUUID();
     await this.redis.set(`reset:${token}`, user.id, 15 * 60); // 15 min TTL
-    this.mail.sendForgotPassword(user.email, user.firstName, token).catch(() => null);
+    this.mail
+      .sendForgotPassword(user.email, user.firstName, token)
+      .catch(() => null);
   }
 
   async resetPassword(token: string, newPassword: string) {
     const userId = await this.redis.get(`reset:${token}`);
-    if (!userId) throw new UnauthorizedException('Reset link is invalid or has expired');
+    if (!userId)
+      throw new UnauthorizedException('Reset link is invalid or has expired');
 
     const hashed = await bcrypt.hash(newPassword, 12);
     await this.prisma.db.user.update({
@@ -94,7 +97,9 @@ export class AuthService {
   }
 
   async deleteAccount(userId: string, rawAccessToken?: string) {
-    const user = await this.prisma.db.user.findUniqueOrThrow({ where: { id: userId } });
+    const user = await this.prisma.db.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
 
     await this.prisma.db.user.update({
       where: { id: userId },

@@ -185,7 +185,8 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Request a password reset email',
-    description: 'Sends a reset link to the email if it exists. Always returns 204 to prevent email enumeration.',
+    description:
+      'Sends a reset link to the email if it exists. Always returns 204 to prevent email enumeration.',
   })
   @ApiNoContentResponse({ description: 'Reset email sent (if account exists)' })
   @ApiBody({ type: ForgotPasswordDto })
@@ -212,7 +213,8 @@ export class AuthController {
   @ApiCookieAuth('accessToken')
   @ApiOperation({
     summary: 'Delete own account',
-    description: 'Soft-deletes the account, revokes all sessions, and sends a farewell email.',
+    description:
+      'Soft-deletes the account, revokes all sessions, and sends a farewell email.',
   })
   @ApiNoContentResponse({ description: 'Account deleted' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
