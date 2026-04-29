@@ -7,7 +7,7 @@ import {
 
 export function welcomeTemplate(firstName: string, appUrl: string): string {
   return baseTemplate(`
-    ${header('Welcome aboard!', 'Your blogging journey starts now.', '✍️')}
+    ${header('Welcome to Echowrite!', 'Your writing journey starts now.', '✍️')}
     <tr>
       <td style="padding:40px;">
         <p style="margin:0 0 8px;color:#374151;font-size:16px;line-height:1.7;">

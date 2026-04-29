@@ -15,7 +15,7 @@ export function baseTemplate(content: string): string {
           <tr>
             <td style="padding:24px 40px;background:#f9fafb;border-top:1px solid #e5e7eb;text-align:center;">
               <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.6;">
-                You received this email from <strong style="color:#6366f1;">The Blog</strong>.<br/>
+                You received this email from <strong style="color:#6366f1;">Echowrite</strong>.<br/>
                 If you didn't expect this, you can safely ignore it.
               </p>
             </td>

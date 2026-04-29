@@ -26,7 +26,7 @@ export class UploadService {
     const result = await new Promise<{ secure_url: string; public_id: string }>(
       (resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({ folder: 'blog' }, (err, res) =>
+          .upload_stream({ folder: 'echowrite' }, (err, res) =>
             err || !res ? reject(err) : resolve(res),
           )
           .end(file.buffer);

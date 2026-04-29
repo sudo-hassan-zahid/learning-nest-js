@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-nestdb}
+      POSTGRES_DB: ${DB_NAME:-echowrite}
     ports:
       - '5460:5432'
     volumes:
@@ -17,7 +17,7 @@ services:
       test:
         [
           'CMD-SHELL',
-          'pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-nestdb}',
+          'pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-echowrite}',
         ]
       interval: 10s
       timeout: 5s
@@ -48,7 +48,7 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-nestdb}?schema=public
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-echowrite}?schema=public
       REDIS_URL: redis://redis:6379
     ports:
       - '${PORT:-3000}:3000'

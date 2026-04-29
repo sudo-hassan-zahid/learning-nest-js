@@ -41,7 +41,7 @@ export function accountDeletedTemplate(
         ${ctaButton('Create a New Account', `${appUrl}/signup`)}
 
         <p style="margin:28px 0 0;color:#9ca3af;font-size:13px;line-height:1.6;">
-          Thank you for being part of the blog community. We hope to see you again.
+          Thank you for being part of the Echowrite community. We hope to see you again.
         </p>
       </td>
     </tr>

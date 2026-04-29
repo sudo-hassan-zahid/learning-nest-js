@@ -24,7 +24,7 @@ export class MailService {
   sendWelcome(to: string, firstName: string) {
     return this.send(
       to,
-      'Welcome to the blog ✍️',
+      'Welcome to Echowrite ✍️',
       welcomeTemplate(firstName, process.env.APP_URL ?? ''),
     );
   }

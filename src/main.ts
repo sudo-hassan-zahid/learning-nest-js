@@ -36,9 +36,9 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS Auth API')
+    .setTitle('Echowrite API')
     .setDescription(
-      `## Overview\n\nA JWT-based authentication API built with NestJS, Prisma, and PostgreSQL.\n\n` +
+      `## Overview\n\nThe REST API powering **Echowrite** — a modern blogging platform built with NestJS, Prisma, and PostgreSQL.\n\n` +
         `## Authentication\n\nTokens are stored in **HTTP-only secure cookies** — the browser sends them automatically on every request.\n\n` +
         `| Cookie | TTL | Notes |\n` +
         `|--------|-----|-------|\n` +
@@ -60,7 +60,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document, {
-    customSiteTitle: 'NestJS Auth API Docs',
+    customSiteTitle: 'Echowrite API Docs',
     swaggerOptions: {
       persistAuthorization: true,
       tagsSorter: 'alpha',

@@ -64,7 +64,7 @@ $ docker compose logs -f redis
 $ docker compose restart app
 
 # open a psql shell
-$ docker compose exec db psql -U postgres -d nestdb
+$ docker compose exec db psql -U postgres -d echowrite
 
 # open a redis-cli shell
 $ docker compose exec redis redis-cli
@@ -81,7 +81,7 @@ $ docker compose up --build -d app
 |-|---|
 | Host | `localhost` |
 | Port | `5460` |
-| Database | `nestdb` |
+| Database | `echowrite` |
 | Username | `postgres` |
 | Password | `postgres` |
 

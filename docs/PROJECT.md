@@ -1,8 +1,8 @@
-# Project Specs — NestJS Blogger API
+# Project Specs — Echowrite API
 
 ## What We're Building
 
-A production-grade REST API for a full-featured blogging platform, built with NestJS, PostgreSQL (Prisma), and Redis. Designed to back a Next.js frontend.
+A production-grade REST API powering **Echowrite**, a modern blogging platform built with NestJS, PostgreSQL (Prisma), and Redis. Designed to back a Next.js frontend.
 
 ---
 

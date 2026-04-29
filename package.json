@@ -1,8 +1,8 @@
 {
-  "name": "learning-nest-js",
+  "name": "echowrite",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Echowrite — a modern blogging platform API",
+  "author": "Hassan",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
