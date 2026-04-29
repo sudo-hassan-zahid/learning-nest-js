@@ -5,7 +5,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RedisService } from '../redis/redis.service.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 
@@ -14,6 +16,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly redis: RedisService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -63,8 +66,22 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
-  async logout(userId: string) {
+  async logout(userId: string, rawAccessToken?: string) {
     await this.prisma.db.refreshToken.deleteMany({ where: { userId } });
+
+    if (rawAccessToken) {
+      const payload = this.jwt.decode(rawAccessToken) as {
+        jti?: string;
+        exp?: number;
+      } | null;
+
+      if (payload?.jti && payload.exp) {
+        const ttl = payload.exp - Math.floor(Date.now() / 1000);
+        if (ttl > 0) {
+          await this.redis.set(`blacklist:${payload.jti}`, '1', ttl);
+        }
+      }
+    }
   }
 
   private async issueTokens(user: {
@@ -77,17 +94,21 @@ export class AuthService {
     createdAt: Date;
     updatedAt: Date;
   }) {
-    const payload = { sub: user.id, email: user.email };
+    const jti = randomUUID();
+    const payload = { sub: user.id, email: user.email, jti };
 
     const accessToken = this.jwt.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN ?? '15m') as never,
     });
 
-    const refreshToken = this.jwt.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as never,
-    });
+    const refreshToken = this.jwt.sign(
+      { sub: user.id, email: user.email },
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as never,
+      },
+    );
 
     const tokenHash = await bcrypt.hash(refreshToken, 10);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -96,29 +117,11 @@ export class AuthService {
       data: { userId: user.id, tokenHash, expiresAt },
     });
 
-    const {
-      id,
-      email,
-      firstName,
-      lastName,
-      isActive,
-      isDeleted,
-      createdAt,
-      updatedAt,
-    } = user;
+    const { id, email, firstName, lastName, isActive, isDeleted, createdAt, updatedAt } = user;
     return {
       accessToken,
       refreshToken,
-      user: {
-        id,
-        email,
-        firstName,
-        lastName,
-        isActive,
-        isDeleted,
-        createdAt,
-        updatedAt,
-      },
+      user: { id, email, firstName, lastName, isActive, isDeleted, createdAt, updatedAt },
     };
   }
 }

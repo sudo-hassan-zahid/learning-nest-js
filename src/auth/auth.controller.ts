@@ -5,9 +5,11 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import {
   ApiBody,
   ApiCookieAuth,
@@ -167,9 +169,10 @@ export class AuthController {
   })
   async logout(
     @CurrentUser() user: { id: string },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.authService.logout(user.id);
+    await this.authService.logout(user.id, req.cookies?.accessToken);
     res.clearCookie('accessToken', { path: '/' });
     res.clearCookie('refreshToken', { path: '/auth/refresh' });
   }
