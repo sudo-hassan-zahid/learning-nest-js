@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,18 +6,34 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
 model User {
   id            String         @id @default(uuid())
   firstName     String
   lastName      String
   email         String         @unique
   password      String
+  avatar        String?
+  bio           String?
   isActive      Boolean        @default(true)
   isDeleted     Boolean        @default(false)
   deletedAt     DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
+  posts         Post[]
+  likes         Like[]
+  comments      Comment[]
+  media         Media[]
 }
 
 model RefreshToken {
@@ -34,4 +45,103 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// ─── Blog ────────────────────────────────────────────────────────────────────
+
+model Post {
+  id          String     @id @default(uuid())
+  title       String
+  slug        String     @unique
+  content     String
+  excerpt     String?
+  coverImage  String?
+  status      PostStatus @default(DRAFT)
+  viewCount   Int        @default(0)
+  authorId    String
+  publishedAt DateTime?
+  isDeleted   Boolean    @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  author      User       @relation(fields: [authorId], references: [id])
+  tags        PostTag[]
+  likes       Like[]
+  comments    Comment[]
+  shareLinks  ShareLink[]
+
+  @@index([authorId])
+  @@index([status])
+  @@index([slug])
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  posts     PostTag[]
+}
+
+model PostTag {
+  postId String
+  tagId  String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  content   String
+  postId    String
+  authorId  String
+  parentId  String?
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+  parent    Comment?  @relation("Replies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("Replies")
+
+  @@index([postId])
+  @@index([parentId])
+}
+
+model ShareLink {
+  id        String    @id @default(uuid())
+  postId    String
+  shortCode String    @unique
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([shortCode])
+}
+
+// ─── Media ───────────────────────────────────────────────────────────────────
+
+model Media {
+  id           String   @id @default(uuid())
+  url          String
+  publicId     String
+  mimetype     String
+  size         Int
+  uploadedById String
+  createdAt    DateTime @default(now())
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
 }

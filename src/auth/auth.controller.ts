@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -37,6 +38,8 @@ import {
   AuthThrottle,
   RefreshThrottle,
 } from '../common/decorators/throttle.decorator.js';
+import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
 
 const COOKIE_DEFAULTS = {
   httpOnly: true,
@@ -173,6 +176,54 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.authService.logout(user.id, req.cookies?.accessToken);
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/auth/refresh' });
+  }
+
+  @Post('forgot-password')
+  @AuthThrottle()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Request a password reset email',
+    description:
+      'Sends a reset link to the email if it exists. Always returns 204 to prevent email enumeration.',
+  })
+  @ApiNoContentResponse({ description: 'Reset email sent (if account exists)' })
+  @ApiBody({ type: ForgotPasswordDto })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  @AuthThrottle()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Reset password using a token from email',
+    description: 'Token is single-use and expires in 15 minutes.',
+  })
+  @ApiNoContentResponse({ description: 'Password updated successfully' })
+  @ApiBody({ type: ResetPasswordDto })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  @Delete('account')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiCookieAuth('accessToken')
+  @ApiOperation({
+    summary: 'Delete own account',
+    description:
+      'Soft-deletes the account, revokes all sessions, and sends a farewell email.',
+  })
+  @ApiNoContentResponse({ description: 'Account deleted' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
+  async deleteAccount(
+    @CurrentUser() user: { id: string },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.deleteAccount(user.id, req.cookies?.accessToken);
     res.clearCookie('accessToken', { path: '/' });
     res.clearCookie('refreshToken', { path: '/auth/refresh' });
   }

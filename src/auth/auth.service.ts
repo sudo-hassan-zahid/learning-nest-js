@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
+import { MailService } from '../mail/mail.service.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly redis: RedisService,
+    private readonly mail: MailService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -31,6 +33,7 @@ export class AuthService {
       data: { ...dto, password: hashed },
     });
 
+    this.mail.sendWelcome(user.email, user.firstName).catch(() => null);
     return this.issueTokens(user);
   }
 
@@ -64,6 +67,49 @@ export class AuthService {
     });
 
     return this.issueTokens(user);
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.db.user.findFirst({
+      where: { email, isDeleted: false },
+    });
+    // always return success to prevent email enumeration
+    if (!user) return;
+
+    const token = randomUUID();
+    await this.redis.set(`reset:${token}`, user.id, 15 * 60); // 15 min TTL
+    this.mail
+      .sendForgotPassword(user.email, user.firstName, token)
+      .catch(() => null);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const userId = await this.redis.get(`reset:${token}`);
+    if (!userId)
+      throw new UnauthorizedException('Reset link is invalid or has expired');
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await this.prisma.db.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
+    await this.redis.del(`reset:${token}`);
+  }
+
+  async deleteAccount(userId: string, rawAccessToken?: string) {
+    const user = await this.prisma.db.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
+
+    await this.prisma.db.user.update({
+      where: { id: userId },
+      data: { isDeleted: true, deletedAt: new Date(), isActive: false },
+    });
+
+    // revoke all sessions
+    await this.logout(userId, rawAccessToken);
+
+    this.mail.sendAccountDeleted(user.email, user.firstName).catch(() => null);
   }
 
   async logout(userId: string, rawAccessToken?: string) {
@@ -117,11 +163,29 @@ export class AuthService {
       data: { userId: user.id, tokenHash, expiresAt },
     });
 
-    const { id, email, firstName, lastName, isActive, isDeleted, createdAt, updatedAt } = user;
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+      isActive,
+      isDeleted,
+      createdAt,
+      updatedAt,
+    } = user;
     return {
       accessToken,
       refreshToken,
-      user: { id, email, firstName, lastName, isActive, isDeleted, createdAt, updatedAt },
+      user: {
+        id,
+        email,
+        firstName,
+        lastName,
+        isActive,
+        isDeleted,
+        createdAt,
+        updatedAt,
+      },
     };
   }
 }

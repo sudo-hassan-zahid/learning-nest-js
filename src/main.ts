@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,14 +29,16 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
 
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS Auth API')
+    .setTitle('Echowrite API')
     .setDescription(
-      `## Overview\n\nA JWT-based authentication API built with NestJS, Prisma, and PostgreSQL.\n\n` +
+      `## Overview\n\nThe REST API powering **Echowrite** — a modern blogging platform built with NestJS, Prisma, and PostgreSQL.\n\n` +
         `## Authentication\n\nTokens are stored in **HTTP-only secure cookies** — the browser sends them automatically on every request.\n\n` +
         `| Cookie | TTL | Notes |\n` +
         `|--------|-----|-------|\n` +
@@ -56,7 +60,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document, {
-    customSiteTitle: 'NestJS Auth API Docs',
+    customSiteTitle: 'Echowrite API Docs',
     swaggerOptions: {
       persistAuthorization: true,
       tagsSorter: 'alpha',
