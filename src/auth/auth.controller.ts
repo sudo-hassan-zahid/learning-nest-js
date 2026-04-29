@@ -27,6 +27,10 @@ import { TokenPairDto, UserProfileDto } from './dto/auth-response.dto.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { RefreshTokenGuard } from './guards/refresh-token.guard.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
+import {
+  AuthThrottle,
+  RefreshThrottle,
+} from '../common/decorators/throttle.decorator.js';
 
 const COOKIE_DEFAULTS = {
   httpOnly: true,
@@ -53,6 +57,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
+  @AuthThrottle()
   @ApiOperation({
     summary: 'Register a new user',
     description:
@@ -74,6 +79,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @AuthThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Log in',
@@ -113,6 +119,7 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
+  @RefreshThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiCookieAuth('refreshToken')
   @ApiOperation({
